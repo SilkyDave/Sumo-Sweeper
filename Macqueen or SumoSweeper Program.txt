@@ -1,0 +1,79 @@
+//Macqueen or SumoSweeper Program
+//Group 6
+
+//Function for the robot to start spinning on one wheel and scanning
+function goSearching () {
+  basic.showString("S")
+  maqueen.motorRun(maqueen.Motors.M1, maqueen.Dir.CW, 150)
+  maqueen.motorRun(maqueen.Motors.M2, maqueen.Dir.CCW, 150)
+  counter = 0
+  searching = true
+  basic.pause(500)
+  while (searching) {
+      distance = maqueen.Ultrasonic(PingUnit.Centimeters)
+// If statement so if an object is sensed using the Ultrasonic sensors he will move foward
+      if (distance > 0 && distance < 15) {
+          maqueen.motorStop(maqueen.Motors.All)
+          maqueen.motorRun(maqueen.Motors.M1, maqueen.Dir.CCW, 100)
+          basic.pause(200)
+          maqueen.motorStop(maqueen.Motors.M1)
+          found = true
+          searching = false
+      }
+      if (counter > 50) {
+          maqueen.motorStop(maqueen.Motors.All)
+          found = false
+          searching = false
+      }
+      counter += 1
+  }
+}
+//Function for Sumo Sweeper to do 360 and let out a happy noise(Victory Dance) this will be played if he pushes all cups out of the circle.
+function goDance () {
+  basic.showIcon(IconNames.Yes)
+  maqueen.motorRun(maqueen.Motors.M1, maqueen.Dir.CCW, 255)
+  maqueen.motorRun(maqueen.Motors.M2, maqueen.Dir.CW, 255)
+  music.playTone(220, music.beat(BeatFraction.Eighth))
+  basic.pause(100)
+  music.playTone(220, music.beat(BeatFraction.Half))
+  basic.pause(500)
+  maqueen.motorStop(maqueen.Motors.All)
+}
+// Allows macqueen to reverse properly
+function goBack () {
+  basic.showString("B")
+  maqueen.motorRun(maqueen.Motors.All, maqueen.Dir.CCW, 255)
+  basic.pause(1000)
+  maqueen.motorStop(maqueen.Motors.All)
+}
+//Allows macqueen to stop an a good position and move foward to push the cup
+function goPush () {
+  basic.showString("P")
+  maqueen.motorRun(maqueen.Motors.All, maqueen.Dir.CW, 255)
+  pushing = true
+//Stops once macqueen hits the black line
+  while (pushing) {
+      if (maqueen.readPatrol(maqueen.Patrol.PatrolLeft) == 0 || maqueen.readPatrol(maqueen.Patrol.PatrolRight) == 0) {
+          maqueen.motorStop(maqueen.Motors.All)
+          pushing = false
+      }
+  }
+}
+// Variables for each action
+let pushing = false
+let distance = 0
+let searching = false
+let counter = 0
+let found = false
+let active = true
+while (active) {
+  found = false
+  goSearching()
+  if (found) {
+      goPush()
+      goBack()
+  } else {
+      active = false
+  }
+}
+goDance()
